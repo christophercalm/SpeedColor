@@ -1,5 +1,6 @@
 """
 Game that tests the ability to detect differences in colors
+Christopher Calmes
 """
 
 import pygame
@@ -21,12 +22,23 @@ pygame.display.set_caption("Speed Color")
 clock = pygame.time.Clock()
 frame_rate = 60
 
+
 def random_color():
+    """
+    Makes a random color
+    :return: Color tuple
+    """
     r = lambda: random.randint(0, 255)
     return r(), r(), r()
 
 
 def change_color(color, difficulty):
+    """
+    Makes a color that one shade lighter than the inputted color
+    :param color: input color
+    :param difficulty: the value that the color calculation depends on
+    :return: Returns a tuple that can be used as a color
+    """
     newcolor = [0, 0, 0]
 
     for c in range(len(color)):
@@ -40,6 +52,11 @@ def change_color(color, difficulty):
 
 
 def random_square(rows):
+    """
+    Returns random square
+    :param rows:
+    :return: integer
+    """
     return random.randint(0, rows - 1)
 
 
@@ -49,6 +66,7 @@ def get_rect(x, y, rows, cols):
     posX = x // (block_size + _margin)
     posY = y // (block_size + _margin)
     return (posX, posY)
+
 
 # return 2-D list with one 1
 def make_grid(rows: int, cols: int) -> list:
@@ -62,36 +80,41 @@ def text_objects(text, font, color):
     textsurface = font.render(text, True, color)
     return textsurface, textsurface.get_rect()
 
-#get list position with 1
+
+# get list position with 1
 def different_color_pos(grid):
     for j in range(len(grid)):
         for k in range(len(grid[j])):
             if grid[j][k] == 1:
                 return j, k
 
-def draw_time(time_left, screen_color):
 
-    print(time_left, screen_color)
-    time_left_text = pygame.font.Font('freesansbold.ttf', 30)
-    time_left_surf, time_left_rect = text_objects(str("{0:.2f}".format(time_left)), time_left_text, _white)
-    time_left_rect.center = ((_display_width * (7 / 9)), (_display_height * (3 / 7)))
+def draw_time(time_left, time_allowed, grid_color, background_color):
+    time_left_height = (time_allowed - (time_allowed - time_left)) * 100
+    print(time_left_height)
+    reset_rect = (_display_width * (7.25 / 9), (_display_height - _margin), 90, -(_display_width - _display_height))
+    time_left_rect = (_display_width * (7.25 / 9), (_display_height - _margin), 90, -time_left_height)
+    print("Time left", time_left)
 
     # draw blank rectangle before redrawing time
-    pygame.draw.rect(gameDisplay, screen_color, time_left_rect)
-    gameDisplay.blit(time_left_surf, time_left_rect)
+    pygame.draw.rect(gameDisplay, background_color, reset_rect)
+    pygame.display.update(reset_rect)
+
+    pygame.draw.rect(gameDisplay, grid_color, time_left_rect)
+    # gameDisplay.blit(time_left_surf, time_left_rect)
+    pygame.display.update(time_left_rect)
 
 
-def draw_board(rows, cols, difficulty, grid, score, screen_color):
+def draw_board(rows, cols, difficulty, grid, score, grid_color, background_color):
     width = ((_game_width - rows * _margin) + _margin) / rows
     height = ((_game_width - rows * _margin) + _margin) / cols
-    gameDisplay.fill(random_color())
-    color = screen_color
+    gameDisplay.fill(background_color)
+    color = grid_color
 
     score_text = pygame.font.Font('freesansbold.ttf', 30)
     score_surf, score_rect = text_objects("Score: " + str(score), score_text, _white)
-    score_rect.center = ((_display_width * (7 / 9 )), (_display_height * (1 / 7)))
+    score_rect.center = ((_display_width * (7.5 / 9)), (_display_height * (1 / 7)))
     gameDisplay.blit(score_surf, score_rect)
-
 
     for row in range(rows):
         for col in range(cols):
@@ -138,21 +161,61 @@ def game_intro():
         clock.tick(1)
 
 
+def game_over(score):
+    end_screen = True
+
+    while end_screen:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                end_screen = False
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    end_screen = False
+                    game_loop()
+                if event.key == pygame.K_s:
+                    end_screen = False
+                    high_scores()
+
+        gameDisplay.fill(random_color())  # change color every second
+
+        large_text = pygame.font.Font('freesansbold.ttf', 60)
+        small_text = pygame.font.Font('freesansbold.ttf', 30)
+
+        text_surf, text_rect = text_objects("Game Over :(", large_text, _black)
+        text_rect.center = ((_display_width / 2), ((_display_height / 2) - 70))
+        gameDisplay.blit(text_surf, text_rect)
+
+        text_surf, text_rect = text_objects("You scored: " + str(score), small_text, _black)
+        text_rect.center = ((_display_width / 2), ((_display_height / 2)))
+        gameDisplay.blit(text_surf, text_rect)
+
+        text_surf, text_rect = text_objects("Press (r) to continue", small_text, _black)
+        text_rect.center = ((_display_width / 2), ((_display_height / 2) + 50))
+        gameDisplay.blit(text_surf, text_rect)
+
+        pygame.display.update()
+        clock.tick(1)
+
 def game_loop():
+
     # initial values
     rows = 2  # start with 2x2 matrix
     cols = 2
-    difficulty = 30  # value pixels change by
+    difficulty = 35  # value pixels change by
     maxrows = 10
     score = 0
     gamegrid = make_grid(rows, cols)  # initial game grid
 
-    frames = 0 # frames since last loop
-    seconds_left = 3.0
+    frames = 0  # frames since last loop
+    time_allowed = 2.0
+    seconds_left = time_allowed
 
-    screen_color = random_color()
-    draw_board(rows, cols, difficulty, gamegrid, score, screen_color)
-    draw_time(seconds_left, screen_color)
+    grid_color = random_color()
+    background_color = random_color()
+    draw_board(rows, cols, difficulty, gamegrid, score, grid_color, background_color)
+    draw_time(seconds_left, time_allowed, grid_color, background_color)
 
     pygame.display.update()
     done = False
@@ -163,10 +226,10 @@ def game_loop():
         for event in pygame.event.get():  # get all events
             if event.type == pygame.QUIT:
                 done = True
+                pygame.quit()
+                quit()
 
-            pressed = pygame.key.get_pressed()
             # change grid size if press return
-
             if event.type == pygame.MOUSEBUTTONDOWN:  # clicking on squares
                 posx, posy = pygame.mouse.get_pos()
                 posgridx, posgridy, = get_rect(posx, posy, rows, cols)
@@ -175,19 +238,19 @@ def game_loop():
                     clicked_correct = True
                     # debug this
                 else:
-                    pass
-                    # pygame.quit()
-                    # quit()
-                    # game over code
-        print(frames)
+                    game_over(score)
 
-        seconds_left = 3.0 - (frames / frame_rate)
-        print(seconds_left)
-        draw_time(seconds_left, screen_color)
+        # only update the time left if it is greater than 0
+        if seconds_left > 0:
+            seconds_left = time_allowed - (frames / frame_rate)
+        else:
+            game_over(score)
 
-        if seconds_left <= 0:
-            print("Game over")
+        # continuously update the time on the screen
+        draw_time(seconds_left, time_allowed, grid_color, background_color)
+        pygame.display.update()
 
+        # move the game forward if they get the right square
         if clicked_correct:
             if rows < maxrows:
                 rows += 1
@@ -195,20 +258,21 @@ def game_loop():
             difficulty -= .5
             score += 1
             frames = 0
-            seconds_left = 3
+            seconds_left = time_allowed
+
 
             # update game board
             gamegrid = make_grid(rows, cols)
-            print(seconds_left)
-            screen_color = random_color()
-            draw_board(rows, cols, difficulty, gamegrid, score, screen_color)
-            draw_time(seconds_left, screen_color)
+            grid_color = random_color()
+            background_color = random_color()
+            draw_board(rows, cols, difficulty, gamegrid, score, grid_color, background_color)
+            draw_time(seconds_left, time_allowed, grid_color, background_color)
             pygame.display.update()
 
             clicked_correct = False  # reset click
 
-
         frames += 1
         clock.tick(frame_rate)
+
 
 game_intro()
