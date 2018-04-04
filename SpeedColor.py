@@ -94,7 +94,7 @@ def different_color_pos(grid):
 
 
 def draw_time(time_left, time_allowed, grid_color, background_color):
-    time_left_height = (time_allowed - (time_allowed - time_left)) * 150
+    time_left_height = (time_allowed - (time_allowed - time_left)) * 100
     reset_rect = (_display_width * (7.25 / 9), (_display_height - _margin), 90, -(_display_width - _display_height))
     time_left_rect = (_display_width * (7.25 / 9), (_display_height - _margin), 90, -time_left_height)
 
@@ -176,7 +176,7 @@ def game_over(score):
                 pygame.quit()
                 quit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r:
+                if event.key == pygame.K_RETURN:
                     end_screen = False
                     game_loop()
                 if event.key == pygame.K_s:
@@ -193,7 +193,7 @@ def game_over(score):
         text_rect.center = ((_display_width / 2), ((_display_height / 2)))
         gameDisplay.blit(text_surf, text_rect)
 
-        text_surf, text_rect = text_objects("Press (r) to continue", small_text, _black)
+        text_surf, text_rect = text_objects("Press (ENTER) to continue", small_text, _black)
         text_rect.center = ((_display_width / 2), ((_display_height / 2) + 50))
         gameDisplay.blit(text_surf, text_rect)
 
@@ -212,7 +212,7 @@ def game_loop():
     gamegrid = make_grid(rows, cols)  # initial game grid
 
     frames = 0  # frames since last loop
-    time_allowed = 2.0
+    time_allowed = 2.5
     seconds_left = time_allowed
 
     grid_color = random_color()
