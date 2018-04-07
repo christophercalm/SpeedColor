@@ -81,7 +81,7 @@ def get_rect(x, y, rows, cols):
     block_size = (_game_width - rows * _margin) / cols
     posX = x // (block_size + _margin)
     posY = y // (block_size + _margin)
-    return (posX, posY)
+    return posX, posY
 
 
 # return 2-D list with one 1
@@ -229,7 +229,7 @@ def game_over(game_over_score, game_over_high_score):
         game_display.blit(text_surf, text_rect)
 
         text_surf, text_rect = text_objects("You scored: " + str((int(game_over_score))), small_text, _black)
-        text_rect.center = ((_display_width / 2), ((_display_height / 2)))
+        text_rect.center = ((_display_width / 2), (_display_height / 2))
         game_display.blit(text_surf, text_rect)
 
         text_surf, text_rect = text_objects("Press (ENTER) to continue", small_text, _black)
@@ -246,7 +246,6 @@ def game_loop():
     rows = 2  # start with 2x2 matrix
     cols = 2
     difficulty = 35  # value pixels change by
-    maxrows = 12
     score = 0
     clicked = 0
     level = 0
@@ -259,7 +258,7 @@ def game_loop():
         high_score = 0
 
     frames = 0  # frames since last loop
-    time_allowed = 2.5
+    time_allowed = 2.75
     seconds_left = time_allowed
 
     grid_color = random_color()
