@@ -25,7 +25,7 @@ small_text = pygame.font.Font("res/fonts/PressStart2P.ttf", 25)
 score_text = pygame.font.Font("res/fonts/PressStart2P.ttf", 20)
 
 # pygame init things
-gameDisplay = pygame.display.set_mode((_display_width, _display_height))
+game_display = pygame.display.set_mode((_display_width, _display_height))
 pygame.display.set_caption("Speed Color")
 clock = pygame.time.Clock()
 frame_rate = 60
@@ -68,7 +68,6 @@ def random_square(rows):
     return random.randint(0, rows - 1)
 
 
-
 def get_rect(x, y, rows, cols):
     """
     Handles mouse clicking
@@ -92,6 +91,7 @@ def make_grid(rows: int, cols: int) -> list:
     return newgrid
 
 
+# return text object to render
 def text_objects(text, font, color):
     textsurface = font.render(text, True, color)
     return textsurface, textsurface.get_rect()
@@ -105,6 +105,28 @@ def different_color_pos(grid):
                 return j, k
 
 
+# return level to base grid on
+def get_level(num_clicked):
+    if num_clicked <= 5:
+        return 1
+    elif num_clicked > 5 and num_clicked < 8:
+        return 2
+    elif 8 <= num_clicked < 11:
+        return 3
+    elif 11 <= num_clicked < 14:
+        return 4
+    elif 14 <= num_clicked < 17:
+        return 5
+    elif 17 <= num_clicked < 20:
+        return 6
+    elif 20 <= num_clicked < 30:
+        return 7
+    elif 30 <= num_clicked < 40:
+        return 8
+    elif num_clicked >= 40:
+        return 9
+
+
 # draws time left as a rectangle
 def draw_time(time_left, time_allowed, grid_color, background_color):
     time_left_height = (time_allowed - (time_allowed - time_left)) * 100
@@ -112,17 +134,18 @@ def draw_time(time_left, time_allowed, grid_color, background_color):
     time_left_rect = (_display_width * (7.25 / 9), (_display_height - _margin), 90, -time_left_height)
 
     # draw blank rectangle before redrawing time
-    pygame.draw.rect(gameDisplay, background_color, reset_rect)
+    pygame.draw.rect(game_display, background_color, reset_rect)
     pygame.display.update(reset_rect)
 
-    pygame.draw.rect(gameDisplay, grid_color, time_left_rect)
+    pygame.draw.rect(game_display, grid_color, time_left_rect)
     pygame.display.update(time_left_rect)
 
 
+# renders board with high score, score, and numbre clicked
 def draw_board(rows, cols, difficulty, grid, score, high_score, num_clicked, grid_color, background_color):
     width = ((_game_width - rows * _margin) + _margin) / rows
     height = ((_game_width - rows * _margin) + _margin) / cols
-    gameDisplay.fill(background_color)
+    game_display.fill(background_color)
     color = grid_color
 
     # high score
@@ -137,19 +160,20 @@ def draw_board(rows, cols, difficulty, grid, score, high_score, num_clicked, gri
     num_clicked_surf, num_clicked_rect = text_objects("Tiles: " + str(num_clicked), score_text, _white)
     num_clicked_rect.center = ((_display_width * (7.5 / 9)), (_display_height * (1 / 7)) + 90)
 
-    gameDisplay.blit(high_score_surf, high_score_rect)
-    gameDisplay.blit(score_surf, score_rect)
-    gameDisplay.blit(num_clicked_surf, num_clicked_rect)
+    game_display.blit(high_score_surf, high_score_rect)
+    game_display.blit(score_surf, score_rect)
+    game_display.blit(num_clicked_surf, num_clicked_rect)
 
     for row in range(rows):
         for col in range(cols):
             rect = (row * (width + _margin), col * (width + _margin), width, height)
             if grid[row][col] == 0:  # normally draw
-                pygame.draw.rect(gameDisplay, color, rect)
+                pygame.draw.rect(game_display, color, rect)
             elif grid[row][col] == 1:  # square that is different
-                pygame.draw.rect(gameDisplay, (change_color(color, difficulty)), rect)
+                pygame.draw.rect(game_display, (change_color(color, difficulty)), rect)
 
 
+# displays intro
 def game_intro():
     intro = True
 
@@ -162,16 +186,16 @@ def game_intro():
                     intro = False
                     game_loop()
 
-        gameDisplay.fill(random_color())  # change color every second
+        game_display.fill(random_color())  # change color every second
 
         text_surf, text_rect = text_objects("Speed Color", large_text, _black)
         text_rect.center = ((_display_width / 2), (_display_height / 2))
-        gameDisplay.blit(text_surf, text_rect)
+        game_display.blit(text_surf, text_rect)
 
         text_surf, text_rect = text_objects("Press ENTER to continue", small_text, _black)
         text_rect.center = ((_display_width / 2), ((_display_height / 2) + 50))
 
-        gameDisplay.blit(text_surf, text_rect)
+        game_display.blit(text_surf, text_rect)
         pygame.display.update()
         clock.tick(1)
 
@@ -180,8 +204,6 @@ def game_intro():
 def game_over(game_over_score, game_over_high_score):
     if game_over_score > game_over_high_score:
         game_over_high_score = game_over_score
-
-    print(game_over_high_score)
 
     # save high scores
     with open('dat/score.dat', 'wb') as scores:
@@ -200,24 +222,25 @@ def game_over(game_over_score, game_over_high_score):
                     end_screen = False
                     game_loop()
 
-        gameDisplay.fill(random_color())  # change color every second
+        game_display.fill(random_color())  # change color every second
 
         text_surf, text_rect = text_objects("Game Over :(", large_text, _black)
         text_rect.center = ((_display_width / 2), ((_display_height / 2) - 70))
-        gameDisplay.blit(text_surf, text_rect)
+        game_display.blit(text_surf, text_rect)
 
         text_surf, text_rect = text_objects("You scored: " + str((int(game_over_score))), small_text, _black)
         text_rect.center = ((_display_width / 2), ((_display_height / 2)))
-        gameDisplay.blit(text_surf, text_rect)
+        game_display.blit(text_surf, text_rect)
 
         text_surf, text_rect = text_objects("Press (ENTER) to continue", small_text, _black)
         text_rect.center = ((_display_width / 2), ((_display_height / 2) + 50))
-        gameDisplay.blit(text_surf, text_rect)
+        game_display.blit(text_surf, text_rect)
 
         pygame.display.update()
         clock.tick(1)
 
 
+# main loop
 def game_loop():
     # initial values
     rows = 2  # start with 2x2 matrix
@@ -226,6 +249,7 @@ def game_loop():
     maxrows = 12
     score = 0
     clicked = 0
+    level = 0
     gamegrid = make_grid(rows, cols)  # initial game grid
 
     try:
@@ -276,10 +300,15 @@ def game_loop():
 
         # move the game forward if they get the right square
         if clicked_correct:
-            if rows < maxrows:
-                rows += 1
+            cur_level = level
+            level = get_level(clicked)
+            if level > cur_level:
                 cols += 1
-            difficulty -= .5
+                rows += 1
+                difficulty -= 2.5
+            # increase difficulty every click after max level
+            if level > 9:
+                difficulty -= .5
             score += int(20 + 20 * (seconds_left / time_allowed))
             clicked += 1
             frames = 0
