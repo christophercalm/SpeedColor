@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='SpeedColor',
-    version='1.0',
+    version='1.0.0',
     packages=['venv.lib.python3.5.distutils', 'venv.lib.python3.5.encodings', 'venv.lib.python3.5.importlib',
               'venv.lib.python3.5.collections', 'venv.lib.python3.5.site-packages.pip',
               'venv.lib.python3.5.site-packages.pip.req', 'venv.lib.python3.5.site-packages.pip.vcs',
@@ -64,6 +64,6 @@ setup(
     url='https://github.com/christophercalm/SpeedColor',
     license='GPL 3.0',
     author='Christopher Calmes',
-    author_email='christopher.calmes@okbu.edu',
-    description='Game that tests the ability of user to differentiate colors'
+    author_email='Christopher.calmes@okbu.edu',
+    description='Game that tests the ability of a person to differentiate colors'
 )
