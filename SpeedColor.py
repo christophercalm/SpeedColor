@@ -130,8 +130,8 @@ def get_level(num_clicked):
 # draws time left as a rectangle
 def draw_time(time_left, time_allowed, grid_color, background_color):
     time_left_height = (time_allowed - (time_allowed - time_left)) * 100
-    reset_rect = (_display_width * (7.25 / 9), (_display_height - _margin), 90, -(_display_width - _display_height))
-    time_left_rect = (_display_width * (7.25 / 9), (_display_height - _margin), 90, -time_left_height)
+    reset_rect = (_display_width * (7 / 9), (_display_height - _margin), 110, -(_display_width - _display_height))
+    time_left_rect = (_display_width * (7 / 9), (_display_height - _margin), 110, -time_left_height)
 
     # draw blank rectangle before redrawing time
     pygame.draw.rect(game_display, background_color, reset_rect)
@@ -249,7 +249,7 @@ def game_loop():
     score = 0
     clicked = 0
     level = 0
-    gamegrid = make_grid(rows, cols)  # initial game grid
+    game_grid = make_grid(rows, cols)  # initial game grid
 
     try:
         with open('dat/score.dat', 'rb') as scores:
@@ -263,7 +263,7 @@ def game_loop():
 
     grid_color = random_color()
     background_color = random_color()
-    draw_board(rows, cols, difficulty, gamegrid, score, high_score, clicked, grid_color, background_color)
+    draw_board(rows, cols, difficulty, game_grid, score, high_score, clicked, grid_color, background_color)
     draw_time(seconds_left, time_allowed, grid_color, background_color)
 
     pygame.display.update()
@@ -282,7 +282,7 @@ def game_loop():
             if event.type == pygame.MOUSEBUTTONDOWN:  # clicking on squares
                 posx, posy = pygame.mouse.get_pos()
                 posgridx, posgridy, = get_rect(posx, posy, rows, cols)
-                if (posgridx, posgridy) == different_color_pos(gamegrid):  # if correct square clicked
+                if (posgridx, posgridy) == different_color_pos(game_grid):  # if correct square clicked
                     clicked_correct = True
                 else:
                     game_over(score, high_score)
@@ -314,10 +314,10 @@ def game_loop():
             seconds_left = time_allowed
 
             # update game board
-            gamegrid = make_grid(rows, cols)
+            game_grid = make_grid(rows, cols)
             grid_color = random_color()
             background_color = random_color()
-            draw_board(rows, cols, difficulty, gamegrid, score, high_score, clicked, grid_color, background_color)
+            draw_board(rows, cols, difficulty, game_grid, score, high_score, clicked, grid_color, background_color)
             draw_time(seconds_left, time_allowed, grid_color, background_color)
             pygame.display.update()
 
