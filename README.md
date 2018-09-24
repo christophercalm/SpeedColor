@@ -11,7 +11,7 @@ Pygame >= 1.9.3
 To install requirements:
 ```
 sudo apt install python3
-sudo apt install pip3
+sudo apt install python3-pip
 pip3 install pygame
 ```
 
