@@ -148,12 +148,12 @@ def draw_board(rows, cols, difficulty, grid, score, high_score, num_clicked, gri
     game_display.fill(background_color)
     color = grid_color
 
-    # high score
-    high_score_surf, high_score_rect = text_objects("Top: " + str((int(high_score))), small_text, _white)
+    # score
+    high_score_surf, high_score_rect = text_objects("Score: " + str((int(score))), small_text, _white)
     high_score_rect.center = ((_display_width * (7.5 / 9)), (_display_height * (1 / 7)))
 
-    # score
-    score_surf, score_rect = text_objects("Score: " + str((int(score))), score_text, _white)
+    # high score
+    score_surf, score_rect = text_objects("Top: " + str((int(high_score))), score_text, _white)
     score_rect.center = ((_display_width * (7.5 / 9)), (_display_height * (1 / 7)) + 60)
 
     # clicked
