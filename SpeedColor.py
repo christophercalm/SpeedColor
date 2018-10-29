@@ -7,6 +7,8 @@ import pygame
 import random
 import pickle
 
+# reduces sound delay
+pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
 
 # dimensions
@@ -24,11 +26,17 @@ large_text = pygame.font.Font("res/fonts/PressStart2P.ttf", 60)
 small_text = pygame.font.Font("res/fonts/PressStart2P.ttf", 25)
 score_text = pygame.font.Font("res/fonts/PressStart2P.ttf", 20)
 
+# sounds
+game_loop_music = "res/sound/Game_Loop_Music.mp3"
+click_effect = pygame.mixer.Sound('res/sound/click.ogg')
+
 # pygame init things
 game_display = pygame.display.set_mode((_display_width, _display_height))
 pygame.display.set_caption("Speed Color")
 clock = pygame.time.Clock()
 frame_rate = 60
+
+muted = False
 
 
 def random_color():
@@ -105,11 +113,21 @@ def different_color_pos(grid):
                 return j, k
 
 
+def mute_unmute_music():
+    global muted
+    if pygame.mixer.music.get_busy():
+        muted = True
+        pygame.mixer.music.stop()
+    else:
+        pygame.mixer.music.play()
+        muted = False
+
+
 # return level to base grid on
 def get_level(num_clicked):
     if num_clicked <= 5:
         return 1
-    elif num_clicked > 5 and num_clicked < 8:
+    elif 5 <= num_clicked < 8:
         return 2
     elif 8 <= num_clicked < 11:
         return 3
@@ -123,8 +141,12 @@ def get_level(num_clicked):
         return 7
     elif 30 <= num_clicked < 40:
         return 8
-    elif num_clicked >= 40:
+    elif 40 <= num_clicked < 50:
         return 9
+    elif 60 <= num_clicked < 60:
+        return 9
+    else:
+        return 10
 
 
 # draws time left as a rectangle
@@ -177,6 +199,9 @@ def draw_board(rows, cols, difficulty, grid, score, high_score, num_clicked, gri
 def game_intro():
     intro = True
 
+    pygame.mixer.music.load(game_loop_music)
+    pygame.mixer.music.play(1)
+
     while intro:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -185,6 +210,8 @@ def game_intro():
                 if event.key == pygame.K_RETURN:
                     intro = False
                     game_loop()
+                if event.key == pygame.K_m:
+                    mute_unmute_music()
 
         game_display.fill(random_color())  # change color every second
 
@@ -194,14 +221,20 @@ def game_intro():
 
         text_surf, text_rect = text_objects("Press ENTER to continue", small_text, _black)
         text_rect.center = ((_display_width / 2), ((_display_height / 2) + 50))
-
         game_display.blit(text_surf, text_rect)
+
+        text_surf, text_rect = text_objects("Press m to mute", small_text, _black)
+        text_rect.center = ((_display_width / 2), (_display_height - 50))
+        game_display.blit(text_surf, text_rect)
+
         pygame.display.update()
         clock.tick(1)
 
 
 # function that handles rendering game over screen and saving high score
 def game_over(game_over_score, game_over_high_score):
+    pygame.mixer.music.fadeout(2000)
+
     if game_over_score > game_over_high_score:
         game_over_high_score = game_over_score
 
@@ -218,8 +251,13 @@ def game_over(game_over_score, game_over_high_score):
                 pygame.quit()
                 quit()
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_m:
+                    mute_unmute_music()
                 if event.key == pygame.K_RETURN:
                     end_screen = False
+                    # if not already muted
+                    if not muted:
+                        pygame.mixer.music.play()
                     game_loop()
 
         game_display.fill(random_color())  # change color every second
@@ -245,7 +283,7 @@ def game_loop():
     # initial values
     rows = 2  # start with 2x2 matrix
     cols = 2
-    difficulty = 35  # value pixels change by
+    difficulty = 40  # value pixels change by
     score = 0
     clicked = 0
     level = 0
@@ -278,12 +316,18 @@ def game_loop():
                 pygame.quit()
                 quit()
 
+            # for pausing and un-pausing music
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_m:
+                    mute_unmute_music()
+
             # change grid size if press return
             if event.type == pygame.MOUSEBUTTONDOWN:  # clicking on squares
                 posx, posy = pygame.mouse.get_pos()
                 posgridx, posgridy, = get_rect(posx, posy, rows, cols)
                 if (posgridx, posgridy) == different_color_pos(game_grid):  # if correct square clicked
                     clicked_correct = True
+                    click_effect.play()
                 else:
                     game_over(score, high_score)
 
@@ -304,10 +348,10 @@ def game_loop():
             if level > cur_level:
                 cols += 1
                 rows += 1
-                difficulty -= 2.5
+                difficulty -= 1.5
             # increase difficulty every click after max level
-            if level > 9:
-                difficulty -= .5
+            if level > 9 and difficulty >= 1.5:
+                difficulty -= .3
             score += int(20 + 20 * (seconds_left / time_allowed))
             clicked += 1
             frames = 0
